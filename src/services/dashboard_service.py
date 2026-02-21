@@ -4,6 +4,9 @@ import pandas as pd
 
 from src.database.client import supabase
 
+# Cost per million tokens (Gemini 2.0 Flash Lite blended estimate).
+_COST_PER_1M_TOKENS_USD = 0.075
+
 
 def get_activity_last_n_days(n: int) -> pd.DataFrame:
     """Fetch all activity_logs rows from the last N days. Returns a DataFrame."""
@@ -118,3 +121,61 @@ def get_churn_risks(
         .head(limit)
         .reset_index(drop=True)
     )
+
+
+# ── EPIC-006: Admin Dashboard helpers ─────────────────────────────────────────
+
+def check_supabase_health() -> bool:
+    """Return True if Supabase responds to a lightweight ping, False otherwise."""
+    try:
+        supabase.table("discord_users").select("discord_id").limit(1).execute()
+        return True
+    except Exception:
+        return False
+
+
+def get_ai_audit_logs(limit: int = 50) -> pd.DataFrame:
+    """Last N rows from ai_audit_logs, newest first.
+
+    Returns DataFrame with columns:
+      created_at, user_id, command_name, tokens_used, processing_time_ms, input_prompt
+    """
+    response = (
+        supabase.table("ai_audit_logs")
+        .select("created_at, user_id, command_name, tokens_used, processing_time_ms, input_prompt")
+        .order("created_at", desc=True)
+        .limit(limit)
+        .execute()
+    )
+    if not response.data:
+        return pd.DataFrame(columns=[
+            "created_at", "user_id", "command_name", "tokens_used",
+            "processing_time_ms", "input_prompt",
+        ])
+    df = pd.DataFrame(response.data)
+    df["created_at"] = pd.to_datetime(df["created_at"], utc=True)
+    return df
+
+
+def get_ai_cost_summary() -> dict:
+    """Token totals and estimated USD cost for the current calendar month.
+
+    Returns dict with keys: total_tokens (int), estimated_cost_usd (float), call_count (int).
+    """
+    now = datetime.now(timezone.utc)
+    cycle_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).isoformat()
+    response = (
+        supabase.table("ai_audit_logs")
+        .select("tokens_used")
+        .gte("created_at", cycle_start)
+        .execute()
+    )
+    if not response.data:
+        return {"total_tokens": 0, "estimated_cost_usd": 0.0, "call_count": 0}
+    tokens = [row["tokens_used"] for row in response.data if row.get("tokens_used") is not None]
+    total_tokens = sum(tokens)
+    return {
+        "total_tokens": total_tokens,
+        "estimated_cost_usd": (total_tokens / 1_000_000) * _COST_PER_1M_TOKENS_USD,
+        "call_count": len(response.data),
+    }
