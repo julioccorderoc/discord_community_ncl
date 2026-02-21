@@ -1,0 +1,29 @@
+[project]
+name = "discord-community-ncl"
+version = "0.1.0"
+description = "Community OS — Discord engagement tracking and internal dashboard for NCL"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "discord>=2.3.2",
+    "pydantic>=2.12.5",
+    "supabase>=2.10.0",
+    "python-dotenv>=1.0.0",
+    "streamlit>=1.42.0",
+    "anthropic>=0.44.0",
+    "pandas>=2.2.0",
+    "plotly>=5.24.0",
+    "google-generativeai>=0.8.6",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
