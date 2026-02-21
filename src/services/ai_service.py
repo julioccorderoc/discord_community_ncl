@@ -1,6 +1,7 @@
 import json
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 import src.config as config
 
@@ -22,12 +23,14 @@ def analyze_text(text: str) -> dict:
     Falls back to {'rating': 'unknown', 'summary': <raw response>} if JSON
     parsing fails.
     """
-    genai.configure(api_key=config.GEMINI_API_KEY)
-    model = genai.GenerativeModel(
-        model_name="gemini-1.5-flash",
-        system_instruction=_SYSTEM_PROMPT,
+    client = genai.Client(api_key=config.GEMINI_API_KEY)
+    response = client.models.generate_content(
+        model="gemini-1.5-flash",
+        contents=f"Analyze this text: {text}",
+        config=types.GenerateContentConfig(
+            system_instruction=_SYSTEM_PROMPT,
+        ),
     )
-    response = model.generate_content(f"Analyze this text: {text}")
     raw = response.text.strip()
 
     # Strip markdown code fences if the model wraps the JSON.
