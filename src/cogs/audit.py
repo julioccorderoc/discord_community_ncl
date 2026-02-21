@@ -6,7 +6,7 @@ from discord import app_commands
 from discord.ext import commands
 
 import src.config as config
-from src.services.ai_service import analyze_text
+from src.services.ai_service import analyze_text, log_ai_audit
 
 log = logging.getLogger(__name__)
 
@@ -73,6 +73,19 @@ class AuditCog(commands.Cog):
         embed.set_footer(text=f"Analyzed by {config.GEMINI_MODEL} | /audit")
 
         await interaction.followup.send(embed=embed, ephemeral=True)
+
+        # Fire-and-forget DB write — never blocks the Discord response.
+        asyncio.create_task(
+            asyncio.to_thread(
+                log_ai_audit,
+                interaction.user.id,
+                "/audit",
+                text,
+                result.get("raw_response"),
+                result.get("tokens_used"),
+                result.get("elapsed_ms"),
+            )
+        )
 
 
 async def setup(bot: commands.Bot) -> None:
