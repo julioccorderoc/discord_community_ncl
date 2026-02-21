@@ -50,7 +50,22 @@ Extracted from **ADR-001** (Unified Python Stack). These are hard constraints fo
 
 ---
 
-## 6. Forbidden Patterns
+## 6. Deployment (Railway)
+
+See ADR-003 and `docs/deployment/railway.md` for full details.
+
+- **Platform:** Railway — two services (bot Worker + dashboard Web Service) in one Project
+- **Bot start command:** `uv run python main.py`
+- **Dashboard start command:** `uv run streamlit run src/dashboard/app.py --server.port $PORT --server.address 0.0.0.0`
+  - `$PORT` is injected by Railway — never hardcode a port
+  - `--server.address 0.0.0.0` is mandatory for Railway's router to reach the process
+- **`uv.lock` must be committed** — Railway uses it to reproduce the dependency graph
+- **Secrets:** set as Environment Variables in the Railway UI only — never upload `.env`
+- **`.env.example`** is the authoritative list of all required variables — keep it in sync with `src/config.py`
+
+---
+
+## 7. Forbidden Patterns
 
 | Pattern | Why Forbidden |
 | --- | --- |
@@ -60,3 +75,5 @@ Extracted from **ADR-001** (Unified Python Stack). These are hard constraints fo
 | `supabase.table(...)` inside `src/dashboard/` | Violates service layer — see db_rules.md §3 |
 | JS frameworks (React/Vue/Next) | Python-only stack per ADR-001 |
 | Hardcoded API keys or tokens in source | Use `src/config.py` + `.env` only |
+| Hardcoded port numbers in start commands | Use `$PORT` injected by Railway |
+| Uploading `.env` to Railway | Use Railway Variables UI only |

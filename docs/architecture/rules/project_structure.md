@@ -16,18 +16,23 @@ discord_community_ncl/
 ├── docs/
 │   ├── PRD.md                  # Product requirements (do not modify without PM approval)
 │   ├── roadmap.md              # Epic tracker (Planner Agent writes here)
-│   └── architecture/
-│       ├── ADRs/               # Immutable decision records
-│       └── rules/              # Injected agent constraints (this file lives here)
+│   ├── architecture/
+│   │   ├── ADRs/               # Immutable decision records
+│   │   └── rules/              # Injected agent constraints (this file lives here)
+│   └── deployment/
+│       └── railway.md          # Step-by-step Railway deployment runbook
 ├── src/                        # ALL application Python code
 │   ├── cogs/                   # discord.py Cogs (bot commands & event listeners)
+│   ├── dashboard/              # Streamlit dashboard pages and components
 │   ├── database/               # Supabase client singleton
 │   ├── models/                 # Pydantic V2 schemas (shared by bot + dashboard)
 │   ├── services/               # Business logic / DB query layer (shared by bot + dashboard)
 │   └── config.py               # Env var loading via python-dotenv
 ├── main.py                     # Bot entry point
 ├── pyproject.toml              # Dependencies (managed by uv)
-└── .env                        # Local secrets — NEVER commit to git
+├── uv.lock                     # Lockfile — MUST be committed (Railway uses it)
+├── .env                        # Local secrets — NEVER commit to git
+└── .env.example                # Safe-to-commit template — keep in sync with src/config.py
 ```
 
 ---
@@ -40,7 +45,7 @@ discord_community_ncl/
 | Supabase query / business logic | `src/services/<domain>_service.py` |
 | Pydantic model or enum | `src/models/schemas.py` |
 | Streamlit page or widget | `src/dashboard/<page>.py` (create dir when EPIC-004 begins) |
-| New env variable | `.env` + document in `src/config.py` |
+| New env variable | `.env` + `src/config.py` + `.env.example` (all three, always) |
 | Schema change | `database/table_initial_setup.sql` + matching Pydantic update |
 | One-off SQL migration | New file in `database/` with a descriptive name |
 
