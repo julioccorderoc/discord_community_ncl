@@ -90,7 +90,7 @@
 
 ### EPIC-007: Production Deployment
 
-* **Status:** Active
+* **Status:** Complete
 * **Dependencies:** EPIC-006
 * **Business Objective:** Make the bot and dashboard available 24/7 without running on a local machine.
 * **Technical Boundary:** Railway (see ADR-003 and `docs/deployment/railway.md`).
@@ -101,3 +101,40 @@
   * Dashboard service is accessible via its Railway-generated public URL
   * A push to `main` triggers an automatic redeploy of both services
   * `uv.lock` is committed to the repository
+
+---
+
+## Post-MVP Backlog
+
+The following are candidate epics for the next development cycle, ordered by impact.
+None are Active — choose one and move it to `Active` when ready.
+
+### EPIC-008: Ticket Intelligence (AI triage)
+
+* **Status:** Pending
+* **Dependencies:** EPIC-005, EPIC-007
+* **Business Objective:** Reduce staff response time by auto-classifying and routing tickets on creation.
+* **Candidate Features:**
+  * On ticket creation, run the subject through Gemini and auto-set `priority` (LOW / MEDIUM / HIGH / CRITICAL)
+  * Post a suggested response template in the private channel as a staff-only message
+  * Add a "Ticket Summary" command (`/ticket-summary`) that summarises the full conversation thread
+
+### EPIC-009: Engagement Leaderboard & Member Recognition
+
+* **Status:** Pending
+* **Dependencies:** EPIC-002, EPIC-007
+* **Business Objective:** Motivate member participation through visible recognition.
+* **Candidate Features:**
+  * `/leaderboard` slash command — top 10 members by score, posted as a Discord embed
+  * Scheduled weekly leaderboard post to a designated channel (configurable via env var)
+  * Auto-assign a "Rising Star" role to members who break a configurable score threshold
+
+### EPIC-010: Onboarding Flow
+
+* **Status:** Pending
+* **Dependencies:** EPIC-001, EPIC-007
+* **Business Objective:** Reduce drop-off for new members in the first 7 days.
+* **Candidate Features:**
+  * `on_member_join` listener sends a DM with a welcome message and server guide
+  * "Getting Started" checklist channel post, auto-deleted after 7 days
+  * Dashboard filter: "New Members" — joined in the last 7 days, zero activity

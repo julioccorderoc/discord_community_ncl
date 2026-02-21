@@ -62,10 +62,13 @@ This service runs the Discord bot as a persistent background process. It has no 
 
 1. In the Railway Project view, click **New** → **GitHub Repo** (same repo)
 2. **Name:** `dashboard`
-3. **Start Command:** `uv run streamlit run src/dashboard/app.py --server.port $PORT --server.address 0.0.0.0`
-   - `$PORT` is injected automatically by Railway — do not hardcode a port number
+3. Under **Settings → Deploy**, set **Start Command** to:
+   `uv run streamlit run src/dashboard/app.py --server.port $PORT --server.address 0.0.0.0`
+   - `$PORT` is injected automatically by Railway at runtime — do not hardcode a port number
    - `--server.address 0.0.0.0` is required so Railway's router can reach the process
-4. Under **Networking**, click **Generate Domain** to get a public URL for the dashboard
+   - ⚠️ **This must go in Start Command, NOT Build Command.** `$PORT` is not available at build time.
+4. Leave the **Build Command** field blank — Railway auto-runs `uv sync` via railpack
+5. Under **Networking → Generate Domain**, enter port `8080` and click **Generate Domain**
 
 ---
 
