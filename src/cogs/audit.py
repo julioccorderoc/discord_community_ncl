@@ -1,10 +1,14 @@
 import asyncio
+import logging
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 
+import src.config as config
 from src.services.ai_service import analyze_text
+
+log = logging.getLogger(__name__)
 
 _RATING_CONFIG = {
     "green": {
@@ -36,7 +40,25 @@ class AuditCog(commands.Cog):
     async def audit(self, interaction: discord.Interaction, text: str) -> None:
         await interaction.response.defer(ephemeral=True)
 
-        result = await asyncio.to_thread(analyze_text, text)
+        try:
+            result = await asyncio.wait_for(
+                asyncio.to_thread(analyze_text, text),
+                timeout=config.GEMINI_TIMEOUT_SECONDS,
+            )
+        except asyncio.TimeoutError:
+            log.warning("[audit] Gemini timed out after %ds", config.GEMINI_TIMEOUT_SECONDS)
+            await interaction.followup.send(
+                "The analysis timed out. Please try again or contact an admin.",
+                ephemeral=True,
+            )
+            return
+        except Exception as exc:
+            log.error("[audit] Gemini call failed: %r", exc)
+            await interaction.followup.send(
+                "The analysis failed due to an unexpected error. Please contact an admin.",
+                ephemeral=True,
+            )
+            return
 
         rating = result.get("rating", "unknown")
         summary = result.get("summary", "No summary returned.")
@@ -48,7 +70,7 @@ class AuditCog(commands.Cog):
             description=summary,
             color=cfg["color"],
         )
-        embed.set_footer(text="Analyzed by Gemini | /audit")
+        embed.set_footer(text=f"Analyzed by {config.GEMINI_MODEL} | /audit")
 
         await interaction.followup.send(embed=embed, ephemeral=True)
 

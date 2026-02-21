@@ -13,3 +13,5 @@ TICKET_CATEGORY_ID: int | None = int(os.environ["TICKET_CATEGORY_ID"]) if os.env
 
 # EPIC-005: AI Compliance Agent
 GEMINI_API_KEY: str = os.environ["GEMINI_API_KEY"]
+GEMINI_MODEL: str = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash-lite")
+GEMINI_TIMEOUT_SECONDS: int = int(os.environ.get("GEMINI_TIMEOUT_SECONDS", "20"))

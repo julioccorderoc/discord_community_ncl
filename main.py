@@ -1,7 +1,14 @@
 import asyncio
+import logging
 import discord
 from discord.ext import commands
 from src.config import DISCORD_BOT_TOKEN
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%H:%M:%S",
+)
 
 intents = discord.Intents.default()
 intents.message_content = True
