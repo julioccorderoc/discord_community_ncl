@@ -1,9 +1,8 @@
-import asyncio
 from datetime import datetime, timezone
 from typing import Optional
 
 from src.database.client import supabase
-from src.models.schemas import ActivityType
+from src.models.schemas import ActivityType, MemberEventType
 
 # Points stored at 2× scale so reactions (0.5) fit in INT.
 # Score = SUM(points_value) / 2.0 at query time.
@@ -50,5 +49,15 @@ def log_activity(
             "channel_id": channel_id,
             "points_value": POINTS[activity_type],
             "metadata": metadata or {},
+        }
+    ).execute()
+
+
+def log_member_event(user_id: int, event_type: MemberEventType) -> None:
+    """Record a guild join or leave event for a user."""
+    supabase.table("member_events").insert(
+        {
+            "user_id": user_id,
+            "event_type": event_type.value,
         }
     ).execute()

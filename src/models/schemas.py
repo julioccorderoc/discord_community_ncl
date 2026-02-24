@@ -23,6 +23,12 @@ class TicketPriority(str, Enum):
     CRITICAL = 'critical'  # Blocking or safety issue; escalate immediately.
 
 
+class MemberEventType(str, Enum):
+    """Lifecycle events that record when a user enters or exits the guild."""
+    JOIN  = 'join'
+    LEAVE = 'leave'
+
+
 class ActivityType(str, Enum):
     """Discrete user actions that contribute to the engagement score.
 
@@ -152,6 +158,30 @@ class ActivityLog(CommunityBaseModel):
     created_at: Optional[datetime] = Field(
         None,
         description="DB-generated timestamp of when this event row was written.",
+    )
+
+
+class MemberEvent(CommunityBaseModel):
+    """A single join or leave event for a guild member.
+
+    Written by `on_member_join` and `on_member_remove` in ActivityCog.
+    Stored in `member_events` (separate from activity_logs — no channel or score).
+    """
+    id: Optional[int] = Field(
+        None,
+        description="DB-generated BIGINT identity. Absent before insert.",
+    )
+    user_id: int = Field(
+        ...,
+        description="FK → discord_users.discord_id.",
+    )
+    event_type: MemberEventType = Field(
+        ...,
+        description="Whether the user joined or left the guild.",
+    )
+    created_at: Optional[datetime] = Field(
+        None,
+        description="DB-generated timestamp of the event.",
     )
 
 

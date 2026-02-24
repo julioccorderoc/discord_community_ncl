@@ -3,8 +3,8 @@ import discord
 from discord.ext import commands
 
 import src.config as config
-from src.models.schemas import ActivityType
-from src.services.activity_service import log_activity, upsert_user
+from src.models.schemas import ActivityType, MemberEventType
+from src.services.activity_service import log_activity, log_member_event, upsert_user
 
 
 class ActivityCog(commands.Cog):
@@ -67,6 +67,30 @@ class ActivityCog(commands.Cog):
             reaction.message.channel.id,
             {"message_id": reaction.message.id, "emoji": str(reaction.emoji)},
         )
+
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member: discord.Member) -> None:
+        await asyncio.to_thread(
+            upsert_user,
+            member.id,
+            str(member),
+            str(member.display_avatar.url) if member.display_avatar else None,
+            member.joined_at,
+        )
+        await asyncio.to_thread(log_member_event, member.id, MemberEventType.JOIN)
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, member: discord.Member) -> None:
+        # Best-effort upsert — member may already be evicted from guild cache.
+        await asyncio.to_thread(
+            upsert_user,
+            member.id,
+            str(member),
+            str(member.display_avatar.url) if member.display_avatar else None,
+            member.joined_at,
+        )
+        await asyncio.to_thread(log_member_event, member.id, MemberEventType.LEAVE)
 
 
 async def setup(bot: commands.Bot) -> None:
