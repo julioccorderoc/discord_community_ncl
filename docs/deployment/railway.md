@@ -85,6 +85,7 @@ Both services need the full set of variables — the easiest way is to use **Sha
 | `SUPABASE_URL` | Yes | From Supabase project Settings → API |
 | `SUPABASE_SECRET_KEY` | Yes | Use the `service_role` key, not `anon` |
 | `DISCORD_BOT_TOKEN` | Yes | From Discord Developer Portal → Bot |
+| `COMMUNITY_MANAGER_ID` | No | DM redirect target; fallback message sent if absent |
 | `STAFF_ROLE_ID` | No | Ticket system disabled if absent |
 | `TICKET_CATEGORY_ID` | No | Tickets go to server root if absent |
 | `GEMINI_API_KEY` | Yes | From Google AI Studio |

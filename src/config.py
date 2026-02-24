@@ -11,6 +11,9 @@ DISCORD_BOT_TOKEN: str = os.environ["DISCORD_BOT_TOKEN"]
 STAFF_ROLE_ID: int | None = int(os.environ["STAFF_ROLE_ID"]) if os.environ.get("STAFF_ROLE_ID") else None
 TICKET_CATEGORY_ID: int | None = int(os.environ["TICKET_CATEGORY_ID"]) if os.environ.get("TICKET_CATEGORY_ID") else None
 
+# DM Routing — community manager to receive redirected DMs
+COMMUNITY_MANAGER_ID: int | None = int(os.environ["COMMUNITY_MANAGER_ID"]) if os.environ.get("COMMUNITY_MANAGER_ID") else None
+
 # EPIC-005: AI Compliance Agent
 GEMINI_API_KEY: str = os.environ["GEMINI_API_KEY"]
 GEMINI_MODEL: str = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash-lite")
