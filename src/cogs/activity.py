@@ -19,18 +19,16 @@ class ActivityCog(commands.Cog):
         # Redirect DMs to the community manager instead of leaving them unanswered.
         if message.guild is None:
             if config.COMMUNITY_MANAGER_ID is not None:
-                try:
-                    manager = await self.bot.fetch_user(config.COMMUNITY_MANAGER_ID)
-                    await message.author.send(
-                        f"Hey! I'm a bot and can't reply to DMs. "
-                        f"Reach out to **{manager.display_name}** directly:\n"
-                        f"https://discord.com/users/{manager.id}"
-                    )
-                except discord.HTTPException:
-                    await message.author.send(
-                        "Hey! I'm a bot and can't reply to DMs. "
-                        "Please reach out to a community manager in the NCL server."
-                    )
+                await message.author.send(
+                    f"Hey! I'm a bot and can't reply to DMs. "
+                    f"Reach out to <@{config.COMMUNITY_MANAGER_ID}> directly — "
+                    f"click their name to open a chat!"
+                )
+            else:
+                await message.author.send(
+                    "Hey! I'm a bot and can't reply to DMs. "
+                    "Please reach out to a community manager in the NCL server."
+                )
             return
 
         author = message.author
