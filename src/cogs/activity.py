@@ -2,6 +2,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
+import src.config as config
 from src.models.schemas import ActivityType
 from src.services.activity_service import log_activity, upsert_user
 
