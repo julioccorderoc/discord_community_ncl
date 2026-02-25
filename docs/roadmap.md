@@ -281,7 +281,7 @@ await bot.load_extension("src.cogs.presence")
 
 ### EPIC-013: Community Health Dashboard
 
-* **Status:** Pending
+* **Status:** Complete
 * **Dependencies:** EPIC-011, EPIC-012, EPIC-004
 * **Business Objective:** Give Community Managers a visual view of community growth and member presence patterns — complementing the engagement score already shown in EPIC-004.
 
@@ -315,9 +315,9 @@ New "Community Health" tab in `src/dashboard/app.py`:
 
 #### EPIC-013 — Definition of Done
 
-* [ ] All service functions added to `dashboard_service.py` (no Supabase calls inside `app.py`)
-* [ ] "Community Health" tab visible in the Streamlit app
-* [ ] Member Growth chart renders correctly with real data from `member_events`
-* [ ] Avg session duration and peak hours render correctly with data from `presence_sessions`
-* [ ] All sections show a clear empty-state message when data is absent
-* [ ] Existing dashboard tabs (Impact Pulse, The Lists, Admin) are unaffected (regression check)
+* [x] All service functions added to `dashboard_service.py` (no Supabase calls inside `app.py`)
+* [x] "Community Health" tab visible in the Streamlit app
+* [x] Member Growth chart renders correctly with real data from `member_events`
+* [x] Avg session duration and peak hours render correctly with data from `presence_sessions`
+* [x] All sections show a clear empty-state message when data is absent
+* [x] Existing dashboard tabs (Impact Pulse, The Lists, Admin) are unaffected (regression check)
