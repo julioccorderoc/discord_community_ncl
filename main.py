@@ -13,6 +13,7 @@ logging.basicConfig(
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
+intents.presences = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
@@ -33,6 +34,7 @@ async def main() -> None:
         await bot.load_extension("src.cogs.activity")
         await bot.load_extension("src.cogs.tickets")
         await bot.load_extension("src.cogs.audit")
+        await bot.load_extension("src.cogs.presence")
         await bot.start(DISCORD_BOT_TOKEN)
 
 

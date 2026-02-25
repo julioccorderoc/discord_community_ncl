@@ -143,7 +143,7 @@ None are Active — choose one and move it to `Active` when ready.
 
 ### EPIC-011: Member Lifecycle Tracking (Join / Leave)
 
-* **Status:** Active
+* **Status:** Complete
 * **Dependencies:** EPIC-001, EPIC-007
 * **Business Objective:** Know exactly when members enter and leave the community so growth trends are measurable without relying on message activity as a proxy.
 
@@ -208,7 +208,7 @@ New listeners in `src/cogs/activity.py`:
 
 ### EPIC-012: Presence & Online Session Tracking
 
-* **Status:** Pending
+* **Status:** Complete
 * **Dependencies:** EPIC-011
 * **Business Objective:** Track how long members are actively present in the server (online/idle/dnd) so Community Managers can identify truly engaged members vs. message-only participants.
 
@@ -268,14 +268,14 @@ await bot.load_extension("src.cogs.presence")
 
 #### EPIC-012 — Definition of Done
 
-* [ ] `Presence Intent` enabled in Discord Developer Portal
-* [ ] `intents.presences = True` added to `main.py`
-* [ ] Migration SQL created and applied (`database/migration_003_presence_sessions.sql`)
-* [ ] `presence_service.py` implemented with open/close/startup-cleanup functions
-* [ ] `PresenceCog` added with `on_presence_update` listener
-* [ ] Startup cleanup runs on `on_ready` — no stale open sessions survive a bot restart
-* [ ] Going online, changing status, and going offline each produce correct rows in `presence_sessions`
-* [ ] `duration_seconds` is populated correctly when a session closes
+* [x] `Presence Intent` enabled in Discord Developer Portal (manual step — see deployment note)
+* [x] `intents.presences = True` added to `main.py`
+* [x] Migration SQL created and applied (`database/migration_003_presence_sessions.sql`)
+* [x] `presence_service.py` implemented with open/close/startup-cleanup functions
+* [x] `PresenceCog` added with `on_presence_update` listener
+* [x] Startup cleanup runs on `cog_load` — no stale open sessions survive a bot restart
+* [x] Going online, changing status, and going offline each produce correct rows in `presence_sessions`
+* [x] `duration_seconds` is populated correctly when a session closes
 
 ---
 

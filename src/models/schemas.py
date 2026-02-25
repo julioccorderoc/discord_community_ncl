@@ -303,6 +303,39 @@ class TicketEvent(CommunityBaseModel):
     )
 
 
+class PresenceSession(CommunityBaseModel):
+    """A recorded online session for a guild member.
+
+    Written by PresenceCog when a member transitions from offline to online/idle/dnd,
+    and closed (ended_at + duration_seconds set) when they go offline or the bot restarts.
+    Stored in `presence_sessions`.
+    """
+    id: Optional[int] = Field(
+        None,
+        description="DB-generated BIGINT identity. Absent before insert.",
+    )
+    user_id: int = Field(
+        ...,
+        description="FK → discord_users.discord_id.",
+    )
+    status: str = Field(
+        ...,
+        description="Discord presence status at session start: 'online', 'idle', or 'dnd'.",
+    )
+    started_at: Optional[datetime] = Field(
+        None,
+        description="DB-generated timestamp of when the session started.",
+    )
+    ended_at: Optional[datetime] = Field(
+        None,
+        description="Timestamp of when the session ended. NULL means the session is still open.",
+    )
+    duration_seconds: Optional[int] = Field(
+        None,
+        description="Session length in seconds. Computed and written when the session closes.",
+    )
+
+
 class AIAuditLog(CommunityBaseModel):
     """Records every LLM call made via /audit for compliance and cost tracking.
 
