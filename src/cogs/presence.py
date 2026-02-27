@@ -2,6 +2,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
+import src.config as config
 from src.services.activity_service import upsert_user
 from src.services.presence_service import (
     close_all_open_sessions,
@@ -22,7 +23,7 @@ class PresenceCog(commands.Cog):
     async def on_presence_update(
         self, before: discord.Member, after: discord.Member
     ) -> None:
-        if after.bot:
+        if after.bot or after.id in config.IGNORED_USER_IDS:
             return
 
         before_status = str(before.status)

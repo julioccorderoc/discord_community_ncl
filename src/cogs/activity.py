@@ -6,6 +6,9 @@ import src.config as config
 from src.models.schemas import ActivityType, MemberEventType
 from src.services.activity_service import log_activity, log_member_event, upsert_user
 
+def _is_ignored(user_id: int) -> bool:
+    return user_id in config.IGNORED_USER_IDS
+
 
 class ActivityCog(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
@@ -13,7 +16,7 @@ class ActivityCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
-        if message.author.bot:
+        if message.author.bot or _is_ignored(message.author.id):
             return
 
         # Redirect DMs to the community manager instead of leaving them unanswered.
@@ -51,7 +54,7 @@ class ActivityCog(commands.Cog):
     async def on_reaction_add(
         self, reaction: discord.Reaction, user: discord.User | discord.Member
     ) -> None:
-        if user.bot:
+        if user.bot or _is_ignored(user.id):
             return
         await asyncio.to_thread(
             upsert_user,
@@ -71,6 +74,8 @@ class ActivityCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
+        if _is_ignored(member.id):
+            return
         await asyncio.to_thread(
             upsert_user,
             member.id,
@@ -82,6 +87,8 @@ class ActivityCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member) -> None:
+        if _is_ignored(member.id):
+            return
         # Best-effort upsert — member may already be evicted from guild cache.
         await asyncio.to_thread(
             upsert_user,

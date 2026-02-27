@@ -21,3 +21,11 @@ GEMINI_TIMEOUT_SECONDS: int = int(os.environ.get("GEMINI_TIMEOUT_SECONDS", "20")
 
 # EPIC-006: Admin Dashboard
 ADMIN_PASSWORD: str | None = os.environ.get("ADMIN_PASSWORD")
+
+# Internal team members to exclude from all tracking (activity, lifecycle, presence).
+# Set as a comma-separated list of Discord user IDs in .env.
+# Example: IGNORED_USER_IDS=123456789012345678,987654321098765432
+_raw_ignored = os.environ.get("IGNORED_USER_IDS", "")
+IGNORED_USER_IDS: set[int] = {
+    int(uid.strip()) for uid in _raw_ignored.split(",") if uid.strip()
+}
