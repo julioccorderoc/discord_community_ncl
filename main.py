@@ -2,6 +2,7 @@ import asyncio
 import logging
 import discord
 from discord.ext import commands
+import src.config as config
 from src.config import DISCORD_BOT_TOKEN
 
 logging.basicConfig(
@@ -22,6 +23,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 async def on_ready() -> None:
     synced = await bot.tree.sync()
     print(f"Bot ready: {bot.user} (ID: {bot.user.id}) | Synced {len(synced)} slash command(s)")
+    print(f"Ignored user IDs ({len(config.IGNORED_USER_IDS)}): {config.IGNORED_USER_IDS}")
 
 
 @bot.command(name="ping")
