@@ -43,21 +43,19 @@ def close_all_open_sessions() -> None:
     """Close all stale open sessions — called on bot startup after a restart.
 
     Any row with ended_at IS NULL is left over from a previous bot run.
-    Sets ended_at = NOW() and computes duration_seconds for each stale row.
+    Sets ended_at = NOW() but does NOT write duration_seconds: the bot went
+    down between the session opening and this cleanup, so we don't know when
+    the user actually went offline. Leaving duration_seconds NULL excludes
+    these rows from all duration-based aggregations in the dashboard.
     """
     now = datetime.now(timezone.utc)
     result = (
         supabase.table("presence_sessions")
-        .select("id, started_at")
+        .select("id")
         .is_("ended_at", "null")
         .execute()
     )
     for session in result.data:
-        started_at = datetime.fromisoformat(session["started_at"])
-        duration = int((now - started_at).total_seconds())
         supabase.table("presence_sessions").update(
-            {
-                "ended_at": now.isoformat(),
-                "duration_seconds": duration,
-            }
+            {"ended_at": now.isoformat()}
         ).eq("id", session["id"]).execute()

@@ -8,6 +8,12 @@ from src.database.client import supabase
 # Cost per million tokens (Gemini 2.0 Flash Lite blended estimate).
 _COST_PER_1M_TOKENS_USD = 0.075
 
+# Maximum credible duration for a single presence session.
+# Sessions closed by bot-restart cleanup (close_all_open_sessions) have
+# duration_seconds = NULL going forward, but older rows may have inflated values.
+# This cap prevents those stale rows from skewing aggregations.
+_MAX_SESSION_SECONDS = 8 * 3600  # 8 hours
+
 
 def get_activity_last_n_days(n: int) -> pd.DataFrame:
     """Fetch all activity_logs rows from the last N days. Returns a DataFrame."""
@@ -239,7 +245,8 @@ def get_presence_stats(days: int = 7) -> dict:
     df = pd.DataFrame(response.data)
     if IGNORED_USER_IDS:
         df = df[~df["user_id"].isin(IGNORED_USER_IDS)]
-    closed = df.dropna(subset=["duration_seconds"])
+    closed = df.dropna(subset=["duration_seconds"]).copy()
+    closed["duration_seconds"] = closed["duration_seconds"].clip(upper=_MAX_SESSION_SECONDS)
     return {
         "avg_duration_seconds": int(closed["duration_seconds"].mean()) if not closed.empty else 0,
         "total_sessions": len(df),
@@ -298,7 +305,8 @@ def get_top_presence_members(limit: int = 10, days: int = 7) -> pd.DataFrame:
     df = pd.DataFrame(response.data)
     if IGNORED_USER_IDS:
         df = df[~df["user_id"].isin(IGNORED_USER_IDS)]
-    df = df.dropna(subset=["duration_seconds"])
+    df = df.dropna(subset=["duration_seconds"]).copy()
+    df["duration_seconds"] = df["duration_seconds"].clip(upper=_MAX_SESSION_SECONDS)
     if df.empty:
         return pd.DataFrame(columns=["username", "total_seconds"])
     grouped = df.groupby("user_id")["duration_seconds"].sum().reset_index()

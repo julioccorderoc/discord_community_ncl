@@ -92,6 +92,7 @@ with tab1:
         ))
         fig_growth.update_layout(
             xaxis_title="Date",
+            xaxis_type="category",
             yaxis_title="Members",
             legend=dict(orientation="h"),
             margin=dict(l=0, r=0, t=30, b=0),
