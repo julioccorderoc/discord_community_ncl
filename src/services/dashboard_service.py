@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 
+from src.config import IGNORED_USER_IDS
 from src.database.client import supabase
 
 # Cost per million tokens (Gemini 2.0 Flash Lite blended estimate).
@@ -20,6 +21,8 @@ def get_activity_last_n_days(n: int) -> pd.DataFrame:
     if not response.data:
         return pd.DataFrame(columns=["user_id", "points_value", "created_at"])
     df = pd.DataFrame(response.data)
+    if IGNORED_USER_IDS:
+        df = df[~df["user_id"].isin(IGNORED_USER_IDS)]
     df["created_at"] = pd.to_datetime(df["created_at"], utc=True)
     return df
 
@@ -174,6 +177,8 @@ def get_member_events(days: int = 30) -> pd.DataFrame:
     if not response.data:
         return pd.DataFrame(columns=["user_id", "event_type", "created_at"])
     df = pd.DataFrame(response.data)
+    if IGNORED_USER_IDS:
+        df = df[~df["user_id"].isin(IGNORED_USER_IDS)]
     df["created_at"] = pd.to_datetime(df["created_at"], utc=True)
     return df
 
@@ -201,12 +206,14 @@ def get_server_size_metrics(days: int = 30) -> dict:
     """
     response = (
         supabase.table("discord_users")
-        .select("first_seen_at")
+        .select("discord_id, first_seen_at")
         .execute()
     )
     if not response.data:
         return {"current": 0, "baseline": 0, "delta": 0}
     df = pd.DataFrame(response.data)
+    if IGNORED_USER_IDS:
+        df = df[~df["discord_id"].isin(IGNORED_USER_IDS)]
     df["first_seen_at"] = pd.to_datetime(df["first_seen_at"], utc=True)
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
     current = len(df)
@@ -230,6 +237,8 @@ def get_presence_stats(days: int = 7) -> dict:
     if not response.data:
         return {"avg_duration_seconds": 0, "total_sessions": 0, "unique_active_members": 0}
     df = pd.DataFrame(response.data)
+    if IGNORED_USER_IDS:
+        df = df[~df["user_id"].isin(IGNORED_USER_IDS)]
     closed = df.dropna(subset=["duration_seconds"])
     return {
         "avg_duration_seconds": int(closed["duration_seconds"].mean()) if not closed.empty else 0,
@@ -249,14 +258,15 @@ def get_peak_hours(days: int = 7) -> pd.DataFrame:
     now = datetime.now(timezone.utc)
     response = (
         supabase.table("presence_sessions")
-        .select("started_at, ended_at")
+        .select("user_id, started_at, ended_at")
         .gte("started_at", cutoff)
         .execute()
     )
     hour_counts = [0] * 24
     if response.data:
         cap = timedelta(hours=24)
-        for row in response.data:
+        rows = [r for r in response.data if r["user_id"] not in IGNORED_USER_IDS] if IGNORED_USER_IDS else response.data
+        for row in rows:
             start = datetime.fromisoformat(row["started_at"])
             end = datetime.fromisoformat(row["ended_at"]) if row["ended_at"] else now
             end = min(end, now, start + cap)
@@ -286,6 +296,8 @@ def get_top_presence_members(limit: int = 10, days: int = 7) -> pd.DataFrame:
     if not response.data:
         return pd.DataFrame(columns=["username", "total_seconds"])
     df = pd.DataFrame(response.data)
+    if IGNORED_USER_IDS:
+        df = df[~df["user_id"].isin(IGNORED_USER_IDS)]
     df = df.dropna(subset=["duration_seconds"])
     if df.empty:
         return pd.DataFrame(columns=["username", "total_seconds"])
